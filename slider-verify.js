@@ -151,7 +151,7 @@
     }
 
     async loadMainApp() {
-      const scriptUrl = './assets/index-C9m6JW7s.js';
+      const scriptUrl = './assets/index-DZXeaAZm.js';
       const timeout = setTimeout(() => this.showError('加载超时，请刷新页面重试。'), 15000);
       try {
         const response = await fetch(scriptUrl, { mode: 'cors' });
