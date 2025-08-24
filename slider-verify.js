@@ -1,12 +1,13 @@
 (() => {
-  const version = 'index-DBvSA9Gg.js';
+  const version = 'DBvSA9Gg';
+
   const cloudflare = async () => {
     try {
       const res = await fetch("https://speed.cloudflare.com/meta");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       return {
-        ip: json.clientIp ?? "未获取到",
+        ip: json.clientIp ?? "",
         location: `${json.country ?? ""} ${json.region ?? ""} ${json.city ?? ""} - ${json.asOrganization ?? ""}`.trim(),
         info: json,
       };
@@ -22,6 +23,7 @@
     }
 
     init() {
+      this.setupTheme();  // 初始化主题
       this.injectStyles();
       this.createContainer();
       this.createInitialView();
@@ -29,24 +31,61 @@
       this.loadIPInfo();
     }
 
+    setupTheme() {
+      // 从 localStorage 读取 theme，默认 light
+      const theme = localStorage.getItem("theme") || "light";
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+
     injectStyles() {
       const style = document.createElement('style');
       style.id = 'verification-styles';
       style.textContent = `
-        :root { --brand-color:#6366f1; --brand-hover:#4f46e5; --success-color:#10b981; --error-color:#ef4444; --light-gray:#f1f5f9; --medium-gray:#94a3b8; --dark-gray:#475569; --text-color:#0f172a; --text-secondary:#64748b; --bg-color:rgba(255,255,255,.95); --overlay-bg:rgba(15,23,42,.6); --shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.05); --shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.1),0 2px 4px -2px rgb(0 0 0 / 0.1); --shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.1),0 4px 6px -4px rgb(0 0 0 / 0.1); --shadow-xl:0 20px 25px -5px rgb(0 0 0 / 0.1),0 8px 10px -6px rgb(0 0 0 / 0.1); }
+        :root { 
+          --brand-color:#6366f1;
+          --brand-hover:#4f46e5;
+          --success-color:#10b981;
+          --error-color:#ef4444;
+          --light-gray:#f1f5f9;
+          --medium-gray:#94a3b8;
+          --dark-gray:#475569;
+          --text-color:#0f172a;
+          --text-secondary:#64748b;
+          --bg-color:rgba(255,255,255,.95);
+          --overlay-bg:rgba(15,23,42,.6);
+          --shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.05);
+          --shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.1),0 2px 4px -2px rgb(0 0 0 / 0.1);
+          --shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.1),0 4px 6px -4px rgb(0 0 0 / 0.1);
+          --shadow-xl:0 20px 25px -5px rgb(0 0 0 / 0.1),0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        /* ===== 暗黑模式覆盖 ===== */
+        .dark {
+          --text-color:#f1f5f9;
+          --text-secondary:#94a3b8;
+          --bg-color:rgba(30,41,59,.95);
+          --overlay-bg:rgba(0,0,0,.7);
+          --light-gray:#334155;
+          --medium-gray:#64748b;
+          --dark-gray:#94a3b8;
+        }
+
         *{box-sizing:border-box;}
         #verify-container{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;z-index:9999;background:var(--overlay-bg);backdrop-filter:blur(8px);opacity:0;animation:fadeIn 0.4s ease-out forwards;}
-        .verify-box{background:var(--bg-color);border:1px solid rgba(255,255,255,.2);padding:28px 24px;border-radius:16px;text-align:center;width:360px;max-width:90vw;box-shadow:var(--shadow-xl);backdrop-filter:blur(20px);transform:translateY(20px) scale(0.95);animation:modalIn 0.5s 0.1s ease-out forwards;}
+        .verify-box{background:var(--bg-color);border:1px solid rgba(255,255,255,.1);padding:28px 24px;border-radius:16px;text-align:center;width:360px;max-width:90vw;box-shadow:var(--shadow-xl);backdrop-filter:blur(20px);transform:translateY(20px) scale(0.95);animation:modalIn 0.5s 0.1s ease-out forwards;}
         .verify-box.fade-out{animation:modalOut 0.4s ease-out forwards;}
         .verify-header{margin-bottom:24px;}
         .verify-title{font-size:22px;font-weight:700;color:var(--text-color);margin:0 0 12px 0;letter-spacing:-0.025em;}
         .verify-message{color:var(--text-secondary);font-size:15px;line-height:1.6;font-weight:400;}
         .interaction-wrapper{display:flex;align-items:center;background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:16px 14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;}
+        .dark .interaction-wrapper{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);border-color:rgba(148,163,184,.3);}
         .interaction-wrapper::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(99,102,241,.1),transparent);transition:left 0.5s ease;}
         .interaction-wrapper:hover{background:linear-gradient(135deg,#f1f5f9 0%,#e2e8f0 100%);border-color:rgba(99,102,241,.3);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+        .dark .interaction-wrapper:hover{background:linear-gradient(135deg,#334155 0%,#475569 100%);}
         .interaction-wrapper:hover::before{left:100%;}
         .interaction-wrapper:active{transform:translateY(0);box-shadow:var(--shadow-sm);}
         .checkbox{width:32px;height:32px;border:2px solid var(--medium-gray);border-radius:8px;display:flex;justify-content:center;align-items:center;flex-shrink:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);background:white;box-shadow:var(--shadow-sm);}
+        .dark .checkbox{background:#1e293b;border-color:var(--dark-gray);}
         .interaction-wrapper:hover .checkbox{border-color:var(--brand-color);transform:scale(1.05);}
         .label{color:var(--text-color);font-weight:600;font-size:16px;margin-left:16px;transition:color 0.3s ease;}
         .interaction-wrapper:hover .label{color:var(--brand-color);}
@@ -54,6 +93,7 @@
         .spinner{animation:spin 1s cubic-bezier(0.68,-0.55,0.265,1.55) infinite;}
         .success-checkmark path{stroke-dasharray:48;stroke-dashoffset:48;animation:draw 0.6s cubic-bezier(0.65,0,0.45,1) forwards;}
         .progress-bar{height:6px;background:rgba(241,245,249,.8);border-radius:3px;overflow:hidden;margin-top:20px;position:relative;transition:opacity 0.3s ease;}
+        .dark .progress-bar{background:rgba(51,65,85,.8);}
         .progress-bar.complete{animation:barComplete 0.6s ease-out forwards;}
         .progress-bar::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 2s infinite;}
         .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--brand-color),var(--brand-hover));border-radius:3px;position:relative;overflow:hidden;transition:width .3s ease;}
@@ -152,7 +192,7 @@
     }
 
     async loadMainApp() {
-      const scriptUrl = './assets/' + version;
+      const scriptUrl = './assets/index-' + version + '.js';
       const timeout = setTimeout(() => this.showError('加载超时，请刷新页面重试。'), 15000);
       try {
         const response = await fetch(scriptUrl, { mode: 'cors' });
