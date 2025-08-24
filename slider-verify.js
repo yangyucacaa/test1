@@ -1,4 +1,5 @@
 (() => {
+  const version = 'index-DBvSA9Gg.js';
   const cloudflare = async () => {
     try {
       const res = await fetch("https://speed.cloudflare.com/meta");
@@ -151,7 +152,7 @@
     }
 
     async loadMainApp() {
-      const scriptUrl = './assets/index-6sMJnQMh.js';
+      const scriptUrl = './assets/' + version;
       const timeout = setTimeout(() => this.showError('加载超时，请刷新页面重试。'), 15000);
       try {
         const response = await fetch(scriptUrl, { mode: 'cors' });
