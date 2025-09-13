@@ -1,5 +1,5 @@
 (() => {
-  const version = 'UTc1VI8g';
+  const version = 'BWdsZ7j7';
 
   const cloudflare = async () => {
     try {
